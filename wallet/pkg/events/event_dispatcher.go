@@ -2,6 +2,7 @@ package events
 
 import (
 	"errors"
+	"slices"
 	"sync"
 )
 
@@ -33,10 +34,13 @@ func (ed *EventDispatcher) Dispatch(event EventInterface) error {
 func (ed *EventDispatcher) Register(eventName string, handler EventHandlerInterface) error {
 
 	if _, ok := ed.handlers[eventName]; ok {
-		for _, h := range ed.handlers[eventName] {
-			if h == handler {
-				return ErrHandlerAlreadyRegistered
-			}
+		// for _, h := range ed.handlers[eventName] {
+		// 	if h == handler {
+		// 		return ErrHandlerAlreadyRegistered
+		// 	}
+		// }
+		if slices.Contains(ed.handlers[eventName], handler) {
+			return ErrHandlerAlreadyRegistered
 		}
 	}
 	ed.handlers[eventName] = append(ed.handlers[eventName], handler)
@@ -45,10 +49,13 @@ func (ed *EventDispatcher) Register(eventName string, handler EventHandlerInterf
 
 func (ed *EventDispatcher) Has(eventName string, handler EventHandlerInterface) bool {
 	if _, ok := ed.handlers[eventName]; ok {
-		for _, h := range ed.handlers[eventName] {
-			if h == handler {
-				return true
-			}
+		// for _, h := range ed.handlers[eventName] {
+		// 	if h == handler {
+		// 		return true
+		// 	}
+		// }
+		if slices.Contains(ed.handlers[eventName], handler) {
+			return true
 		}
 	}
 	return false
@@ -58,7 +65,8 @@ func (ed *EventDispatcher) Remove(eventName string, handler EventHandlerInterfac
 	if _, ok := ed.handlers[eventName]; ok {
 		for i, h := range ed.handlers[eventName] {
 			if h == handler {
-				ed.handlers[eventName] = append(ed.handlers[eventName][:i], ed.handlers[eventName][i+1:]...)
+				// ed.handlers[eventName] = append(ed.handlers[eventName][:i], ed.handlers[eventName][i+1:]...)
+				ed.handlers[eventName] = slices.Delete(ed.handlers[eventName], i, i+1)
 				return nil
 			}
 		}
